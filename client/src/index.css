@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(120, 100%, 54%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+  
+  /* Custom spooky party colors */
+  --neon-green: hsl(144, 100%, 50%);
+  --neon-pink: hsl(320, 100%, 50%);
+  --ghost-white: hsl(0, 0%, 100%);
+  --shadow-purple: hsl(270, 100%, 50%);
+  --deep-black: hsl(0, 0%, 3.9%);
+  --dark-charcoal: hsl(0, 0%, 10.2%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(120, 100%, 54%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    background: radial-gradient(circle at 25% 25%, hsl(270, 100%, 50%) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, hsl(320, 100%, 50%) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, hsl(144, 100%, 50%) 0%, transparent 70%),
+                linear-gradient(45deg, hsl(0, 0%, 3.9%) 0%, hsl(0, 0%, 10.2%) 100%);
+    min-height: 100vh;
+    color: hsl(0, 0%, 100%);
+    overflow-x: hidden;
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap');
+
+/* Custom animations */
+@keyframes pulse-glow {
+  0% { 
+    box-shadow: 0 0 20px var(--neon-green), 0 0 30px var(--neon-green), 0 0 40px var(--neon-green);
+  }
+  100% { 
+    box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green), 0 0 30px var(--neon-green);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes neon-flicker {
+  0% { 
+    text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green), 0 0 30px var(--neon-green);
+  }
+  100% { 
+    text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green), 0 0 15px var(--neon-green);
+  }
+}
+
+@keyframes party-bounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(2deg); }
+}
+
+@keyframes ghost-float {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  25% { transform: translateY(-15px) translateX(10px); }
+  75% { transform: translateY(-5px) translateX(-10px); }
+}
+
+@keyframes glitch-1 {
+  0%, 14%, 15%, 49%, 50%, 99%, 100% { transform: translate(0); }
+  15%, 49% { transform: translate(-2px, 1px); }
+}
+
+@keyframes glitch-2 {
+  0%, 20%, 21%, 62%, 63%, 99%, 100% { transform: translate(0); }
+  21%, 62% { transform: translate(2px, -1px); }
+}
+
+/* Custom classes */
+.neon-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+.neon-border {
+  border: 2px solid var(--neon-green);
+  box-shadow: 0 0 20px var(--neon-green), inset 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-text::before {
+  animation: glitch-1 0.6s infinite;
+  color: var(--neon-pink);
+  z-index: -1;
+}
+
+.glitch-text::after {
+  animation: glitch-2 0.6s infinite;
+  color: var(--neon-green);
+  z-index: -2;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-neon-flicker {
+  animation: neon-flicker 0.5s ease-in-out infinite alternate;
+}
+
+.animate-party-bounce {
+  animation: party-bounce 1s ease-in-out infinite;
+}
+
+.animate-ghost-float {
+  animation: ghost-float 4s ease-in-out infinite;
+}
+
+.font-orbitron {
+  font-family: 'Orbitron', monospace;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
