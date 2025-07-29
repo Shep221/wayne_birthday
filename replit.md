@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a modern full-stack web application built for "The August BDAY-Verse" party event. The application features a spooky-themed landing page with dual countdown functionality: a main countdown to the party date (August 2nd, 7pm) and individual birthday countdowns for three August Leo birthday celebrants. It's designed as a single-page application with a React frontend and an Express backend, featuring a clean architecture that separates client, server, and shared components.
+This is a modern full-stack web application built for Wayne Wu's birthday countdown on August 11th. The application features a spooky, chaotic party-themed landing page with interactive 3D elements, real-time countdown functionality, and mouse tracking effects. Designed specifically for Wayne who works as a bartender at Genies, the app has an alcohol/party theme with spooky disco vibes. It's a single-page application with React frontend and Express backend, enhanced with Three.js for 3D graphics and interactive effects.
 
 ## User Preferences
 
@@ -34,13 +34,18 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Components
 - **UI Library**: Complete shadcn/ui component system with 40+ components
-- **Pages**: Home page with dual countdown functionality, 404 Not Found page
+- **Pages**: Home page with Wayne's birthday countdown, 404 Not Found page
 - **Countdown Features**: 
-  - Main party countdown to August 2nd, 7pm-2am
-  - Individual birthday countdowns for Nara Lee (Aug 1), Isabella Rovira (Aug 3), Wayne Wu (Aug 11)
-  - Real-time updates with formatted time display
-- **Styling**: Dark theme with custom spooky party colors (neon green, neon pink, shadow purple)
-- **Animation**: Framer Motion for countdown animations, floating particles, and hover effects
+  - Main birthday countdown to August 11th, 2025
+  - Real-time updates with formatted time display (days, hours, minutes, seconds)
+  - Interactive countdown cards with 3D mouse hover effects
+- **3D Graphics**: Three.js integration with floating bottle animations (bartender theme)
+- **Interactive Effects**: 
+  - Mouse tracking that affects 3D camera and bottle positions
+  - Mouse trail particles with color transitions
+  - 3D card rotations responding to mouse movement
+- **Styling**: Dark theme with neon party colors (green, pink, purple) and spooky disco vibes
+- **Animation**: Framer Motion for smooth transitions, countdown pulses, and interactive hover states
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 
 ### Backend Components
@@ -68,7 +73,9 @@ Preferred communication style: Simple, everyday language.
 - **@tanstack/react-query**: Server state management
 - **drizzle-orm**: Database ORM and query builder
 - **tailwindcss**: Utility-first CSS framework
-- **framer-motion**: Animation library
+- **framer-motion**: Animation library for smooth transitions and hover effects
+- **three**: 3D graphics library for interactive background effects
+- **@types/three**: TypeScript definitions for Three.js
 
 ### Development Tools
 - **vite**: Build tool and development server

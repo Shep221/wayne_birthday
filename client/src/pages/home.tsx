@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import * as THREE from "three";
 
 interface TimeRemaining {
   days: number;
@@ -26,10 +27,135 @@ export default function Home() {
   });
 
   const [birthdayCountdowns, setBirthdayCountdowns] = useState<Record<string, TimeRemaining>>({});
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const threeContainerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
   const birthdayPeople: BirthdayPerson[] = [
     { name: "Wayne Wu", date: "2025-08-11T00:00:00", emoji: "👑", color: "var(--neon-green)" },
   ];
+
+  // Mouse tracking with trail effect
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      setMousePosition({
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1,
+      });
+
+      // Create mouse trail particle
+      const trail = document.createElement('div');
+      trail.className = 'mouse-trail';
+      trail.style.left = `${event.clientX - 10}px`;
+      trail.style.top = `${event.clientY - 10}px`;
+      
+      document.body.appendChild(trail);
+      
+      // Remove trail element after animation
+      setTimeout(() => {
+        if (document.body.contains(trail)) {
+          document.body.removeChild(trail);
+        }
+      }, 1000);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Three.js scene setup
+  useEffect(() => {
+    if (!threeContainerRef.current) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    threeContainerRef.current.appendChild(renderer.domElement);
+
+    // Create floating bottles (bartender theme)
+    const bottles: THREE.Mesh[] = [];
+    const bottleGeometry = new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8);
+    
+    for (let i = 0; i < 15; i++) {
+      const bottleMaterial = new THREE.MeshPhongMaterial({
+        color: i % 3 === 0 ? 0x00ff88 : i % 3 === 1 ? 0xff0080 : 0x8b00ff,
+        transparent: true,
+        opacity: 0.7,
+        emissive: i % 3 === 0 ? 0x002200 : i % 3 === 1 ? 0x220022 : 0x220088,
+      });
+      
+      const bottle = new THREE.Mesh(bottleGeometry, bottleMaterial);
+      bottle.position.set(
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 10
+      );
+      bottle.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
+      
+      scene.add(bottle);
+      bottles.push(bottle);
+    }
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+    scene.add(ambientLight);
+    
+    const pointLight = new THREE.PointLight(0x00ff88, 1, 100);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    const pointLight2 = new THREE.PointLight(0xff0080, 1, 100);
+    pointLight2.position.set(-5, -5, 5);
+    scene.add(pointLight2);
+
+    camera.position.z = 8;
+
+    sceneRef.current = scene;
+    rendererRef.current = renderer;
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      // Rotate bottles
+      bottles.forEach((bottle, index) => {
+        bottle.rotation.x += 0.01;
+        bottle.rotation.y += 0.02;
+        
+        // Float up and down
+        bottle.position.y += Math.sin(Date.now() * 0.001 + index) * 0.002;
+        
+        // React to mouse movement
+        bottle.position.x += mousePosition.x * 0.001;
+        bottle.position.z += mousePosition.y * 0.001;
+      });
+
+      // Camera movement based on mouse
+      camera.position.x = mousePosition.x * 2;
+      camera.position.y = mousePosition.y * 1;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Cleanup
+    return () => {
+      if (threeContainerRef.current && renderer.domElement) {
+        threeContainerRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, [mousePosition]);
 
   useEffect(() => {
     const partyDate = new Date("2025-08-11T00:00:00").getTime(); // Wayne's birthday: Aug 11
@@ -119,8 +245,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* Three.js Background */}
+      <div 
+        ref={threeContainerRef} 
+        className="fixed inset-0 z-0 pointer-events-none"
+        style={{ mixBlendMode: 'screen' }}
+      />
+      
       {/* Floating Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-10">
         <motion.div
           className="absolute top-10 left-10 w-4 h-4 bg-white rounded-full opacity-30"
           variants={particleVariants}
@@ -157,7 +290,7 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-4">
         {/* Header */}
         <motion.div 
           className="text-center mb-8"
@@ -196,7 +329,15 @@ export default function Home() {
             <motion.div 
               className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ backgroundColor: "rgba(26, 26, 26, 0.5)", backdropFilter: "blur(10px)" }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ 
+                scale: 1.05, 
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
             >
               <div 
                 className="text-5xl md:text-7xl font-orbitron font-black neon-text"
@@ -217,7 +358,15 @@ export default function Home() {
                 backdropFilter: "blur(10px)",
                 animationDelay: "-0.5s" 
               }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
             >
               <div 
                 className="text-5xl md:text-7xl font-orbitron font-black neon-text"
@@ -238,7 +387,15 @@ export default function Home() {
                 backdropFilter: "blur(10px)",
                 animationDelay: "-1s" 
               }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
             >
               <div 
                 className="text-5xl md:text-7xl font-orbitron font-black neon-text"
@@ -259,7 +416,15 @@ export default function Home() {
                 backdropFilter: "blur(10px)",
                 animationDelay: "-1.5s" 
               }}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
             >
               <div 
                 className="text-5xl md:text-7xl font-orbitron font-black neon-text"
@@ -359,87 +524,87 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Fun Birthday Hype Section */}
+        {/* Genies Bartender Section */}
         <motion.div 
           className="w-full max-w-4xl mb-12"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Leo Facts */}
-            <motion.div 
-              className="neon-border rounded-xl p-6"
-              style={{ 
-                backgroundColor: "rgba(26, 26, 26, 0.3)", 
-                backdropFilter: "blur(10px)",
-                borderColor: "var(--neon-green)"
-              }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 
-                className="font-orbitron text-xl font-bold mb-4 text-center"
-                style={{ color: "var(--neon-green)" }}
-              >
-                👑 LEO KING FACTS 👑
-              </h3>
-              <div className="space-y-2 text-sm md:text-base text-white">
-                <p>🦁 Born to rule the party scene</p>
-                <p>🌟 Main character energy 24/7</p>
-                <p>🔥 Charisma level: MAXIMUM</p>
-                <p>🎭 Drama tolerance: INFINITE</p>
-                <p>🍻 Party stamina: LEGENDARY</p>
-              </div>
-            </motion.div>
-
-            {/* Birthday Menu */}
-            <motion.div 
-              className="neon-border rounded-xl p-6"
-              style={{ 
-                backgroundColor: "rgba(26, 26, 26, 0.3)", 
-                backdropFilter: "blur(10px)",
-                borderColor: "var(--neon-pink)"
-              }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <h3 
-                className="font-orbitron text-xl font-bold mb-4 text-center"
-                style={{ color: "var(--neon-pink)" }}
-              >
-                🍸 WASTED MENU 🍸
-              </h3>
-              <div className="space-y-2 text-sm md:text-base text-white">
-                <p>🥃 Leo's Golden Shots</p>
-                <p>🍹 Birthday Chaos Cocktails</p>
-                <p>🍾 Champagne for the King</p>
-                <p>🍻 Liquid Courage Refills</p>
-                <p>🥂 Celebration Ammunition</p>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Hype Messages */}
           <motion.div 
-            className="mt-8 text-center"
-            animate={{ 
-              textShadow: [
-                "0 0 10px var(--neon-green)",
-                "0 0 20px var(--neon-pink)", 
-                "0 0 10px var(--shadow-purple)",
-                "0 0 20px var(--neon-green)"
+            className="neon-border rounded-xl p-8 text-center"
+            style={{ 
+              backgroundColor: "rgba(26, 26, 26, 0.4)", 
+              backdropFilter: "blur(15px)",
+              borderColor: "var(--neon-green)"
+            }}
+            whileHover={{ scale: 1.02 }}
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(0, 255, 136, 0.3)",
+                "0 0 40px rgba(0, 255, 136, 0.5)",
+                "0 0 20px rgba(0, 255, 136, 0.3)"
               ]
             }}
-            transition={{ duration: 3, repeat: Infinity }}
+            transition={{ duration: 2, repeat: Infinity }}
           >
-            <p 
-              className="font-orbitron text-lg md:text-xl font-bold"
-              style={{ color: "var(--ghost-white)" }}
+            <motion.h3 
+              className="font-orbitron text-2xl md:text-3xl font-bold mb-6"
+              style={{ color: "var(--neon-green)" }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
-              {partyTimeRemaining.days > 30 ? "🎯 BIRTHDAY PLANNING MODE ACTIVATED" :
-               partyTimeRemaining.days > 7 ? "⚡ FINAL COUNTDOWN INITIATED" :
-               partyTimeRemaining.days > 1 ? "🚨 DANGER ZONE: PARTY INCOMING" :
-               "🔥 IT'S ALMOST TIME TO GET WASTED"}
-            </p>
+              🍸 GENIES BARTENDER 🍸
+            </motion.h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🥃 Master of craft cocktails
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🍹 Mixing magic behind the bar
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🌟 Creating liquid experiences
+                </motion.p>
+              </div>
+              <div>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🎭 Serving stories with every drink
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🔥 Bringing the nightlife to life
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🚀 Birthday celebration mode: ON
+                </motion.p>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
 

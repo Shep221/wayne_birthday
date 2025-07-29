@@ -144,6 +144,54 @@
   height: 100%;
 }
 
+/* Mouse trail effect */
+.mouse-trail {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+  animation: trail-fade 1s ease-out forwards;
+}
+
+@keyframes trail-fade {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    background: radial-gradient(circle, var(--neon-green) 0%, transparent 70%);
+  }
+  50% {
+    background: radial-gradient(circle, var(--neon-pink) 0%, transparent 70%);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3);
+    background: radial-gradient(circle, var(--shadow-purple) 0%, transparent 70%);
+  }
+}
+
+/* 3D perspective for countdown cards */
+.countdown-card {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Glow effects for UI elements */
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green), 0 0 15px var(--neon-green);
+  }
+  100% {
+    box-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink);
+  }
+}
+
 .glitch-text::before {
   animation: glitch-1 0.6s infinite;
   color: var(--neon-pink);
