@@ -26,13 +26,13 @@
   --ring: hsl(240, 4.9%, 83.9%);
   --radius: 0.5rem;
   
-  /* Custom spooky party colors */
-  --neon-green: hsl(144, 100%, 50%);
-  --neon-pink: hsl(320, 100%, 50%);
-  --ghost-white: hsl(0, 0%, 100%);
-  --shadow-purple: hsl(270, 100%, 50%);
-  --deep-black: hsl(0, 0%, 3.9%);
-  --dark-charcoal: hsl(0, 0%, 10.2%);
+  /* Nature hiking theme colors */
+  --forest-green: hsl(120, 60%, 30%);
+  --mountain-blue: hsl(200, 70%, 40%);
+  --earth-brown: hsl(30, 40%, 25%);
+  --snow-white: hsl(0, 0%, 95%);
+  --sky-blue: hsl(200, 100%, 70%);
+  --tree-green: hsl(140, 50%, 35%);
 }
 
 .dark {
@@ -65,12 +65,9 @@
 
   body {
     @apply font-sans antialiased;
-    background: radial-gradient(circle at 25% 25%, hsl(270, 100%, 50%) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, hsl(320, 100%, 50%) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, hsl(144, 100%, 50%) 0%, transparent 70%),
-                linear-gradient(45deg, hsl(0, 0%, 3.9%) 0%, hsl(0, 0%, 10.2%) 100%);
+    background: linear-gradient(180deg, hsl(200, 100%, 70%) 0%, hsl(200, 70%, 40%) 30%, hsl(120, 60%, 30%) 70%, hsl(30, 40%, 25%) 100%);
     min-height: 100vh;
-    color: hsl(0, 0%, 100%);
+    color: hsl(0, 0%, 20%);
     overflow-x: hidden;
   }
 }
