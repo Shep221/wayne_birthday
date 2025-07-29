@@ -28,13 +28,11 @@ export default function Home() {
   const [birthdayCountdowns, setBirthdayCountdowns] = useState<Record<string, TimeRemaining>>({});
 
   const birthdayPeople: BirthdayPerson[] = [
-    { name: "Nara Lee", date: "2025-08-01T00:00:00", emoji: "👑", color: "var(--neon-green)" },
-    { name: "Isabella Rovira", date: "2025-08-03T00:00:00", emoji: "👑", color: "var(--neon-pink)" },
-    { name: "Wayne Wu", date: "2025-08-11T00:00:00", emoji: "👑", color: "var(--shadow-purple)" },
+    { name: "Wayne Wu", date: "2025-08-11T00:00:00", emoji: "👑", color: "var(--neon-green)" },
   ];
 
   useEffect(() => {
-    const partyDate = new Date("2025-08-02T19:00:00").getTime(); // Party date: Aug 2, 7pm
+    const partyDate = new Date("2025-08-11T00:00:00").getTime(); // Wayne's birthday: Aug 11
 
     const updateCountdowns = () => {
       const now = new Date().getTime();
@@ -172,16 +170,16 @@ export default function Home() {
               className="font-orbitron text-4xl md:text-6xl font-black neon-text mb-4"
               style={{ color: "var(--neon-green)" }}
             >
-              THE AUGUST BDAY-VERSE
+              WAYNE'S BIRTHDAY
             </h1>
             <p className="font-inter text-lg md:text-xl mb-2" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
-              🎂 Party Countdown 🎂
+              👑 Time to get WASTED 👑
             </p>
             <p 
               className="font-inter text-sm md:text-base animate-party-bounce"
               style={{ color: "var(--neon-pink)" }}
             >
-              Saturday, Aug 2 • 7pm-2am • Time to get WASTED
+              August 11th • Leo King Birthday Bash
             </p>
           </div>
         </motion.div>
@@ -207,7 +205,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.days)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                CHAOTIC DAYS
+                {partyTimeRemaining.days === 1 ? "FINAL DAY!" : partyTimeRemaining.days < 7 ? "CHAOS DAYS" : "DAYS TO PARTY"}
               </div>
             </motion.div>
 
@@ -228,7 +226,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.hours)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                HAUNTED HOURS
+                {partyTimeRemaining.hours < 12 && partyTimeRemaining.days === 0 ? "FINAL HOURS!" : "WILD HOURS"}
               </div>
             </motion.div>
 
@@ -249,7 +247,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.minutes)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                WASTED MINUTES
+                {partyTimeRemaining.minutes < 30 && partyTimeRemaining.days === 0 && partyTimeRemaining.hours === 0 ? "LAST MINUTES!" : "WASTED MINUTES"}
               </div>
             </motion.div>
 
@@ -276,7 +274,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* Party Details */}
+        {/* Dynamic Birthday Quote */}
         <motion.div 
           className="text-center mb-8"
           initial={{ opacity: 0, y: 50 }}
@@ -285,147 +283,164 @@ export default function Home() {
         >
           <div className="animate-float" style={{ animationDelay: "-1s" }}>
             <div 
-              className="rounded-xl p-6 border"
+              className="rounded-xl p-6 border-2"
               style={{ 
-                backgroundColor: "rgba(26, 26, 26, 0.3)", 
+                backgroundColor: "rgba(26, 26, 26, 0.5)", 
                 backdropFilter: "blur(10px)",
-                borderColor: "rgba(255, 0, 128, 0.3)"
+                borderColor: "var(--neon-green)"
               }}
             >
-              <p 
-                className="font-inter text-lg md:text-xl mb-2"
-                style={{ color: "var(--neon-pink)" }}
+              <motion.p 
+                className="font-orbitron text-xl md:text-2xl font-bold mb-4"
+                style={{ color: "var(--neon-green)" }}
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  textShadow: [
+                    "0 0 10px var(--neon-green)",
+                    "0 0 20px var(--neon-green)",
+                    "0 0 10px var(--neon-green)"
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
               >
-                Time to get WASTED
-              </p>
+                {partyTimeRemaining.days > 100 ? "🎯 THE LEO KING'S BIRTHDAY IS COMING" :
+                 partyTimeRemaining.days > 30 ? "⚡ BIRTHDAY ENERGY BUILDING..." :
+                 partyTimeRemaining.days > 14 ? "🔥 TWO WEEKS TILL CHAOS!" :
+                 partyTimeRemaining.days > 7 ? "🚨 ONE WEEK WARNING!" :
+                 partyTimeRemaining.days > 3 ? "💥 FINAL COUNTDOWN ACTIVATED" :
+                 partyTimeRemaining.days > 1 ? "🎆 ALMOST BIRTHDAY TIME!" :
+                 partyTimeRemaining.days === 1 ? "🎉 TOMORROW IS THE DAY!" :
+                 "🍾 IT'S WAYNE'S BIRTHDAY!"}
+              </motion.p>
+              
               <p 
-                className="font-inter text-sm md:text-base mb-3"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="font-inter text-base md:text-lg mb-3"
+                style={{ color: "rgba(255, 255, 255, 0.9)" }}
               >
-                August 11th • Leo Grade Birthday Drama
+                August 11th • Leo King's Domain
               </p>
-              <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
-                <span 
-                  className="px-3 py-1 rounded-full"
+              
+              <div className="flex flex-wrap justify-center gap-3 text-sm">
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
                   style={{ 
-                    backgroundColor: "rgba(0, 255, 136, 0.2)", 
-                    color: "var(--neon-green)" 
+                    backgroundColor: "rgba(0, 255, 136, 0.3)", 
+                    color: "var(--neon-green)",
+                    border: "1px solid var(--neon-green)"
                   }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(0, 255, 136, 0.5)" }}
                 >
-                  Spooky Cute
-                </span>
-                <span 
-                  className="px-3 py-1 rounded-full"
+                  👑 ROYAL VIBES
+                </motion.span>
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
                   style={{ 
-                    backgroundColor: "rgba(255, 0, 128, 0.2)", 
-                    color: "var(--neon-pink)" 
+                    backgroundColor: "rgba(255, 0, 128, 0.3)", 
+                    color: "var(--neon-pink)",
+                    border: "1px solid var(--neon-pink)"
                   }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 0, 128, 0.5)" }}
                 >
-                  Haunted Hotness
-                </span>
-                <span 
-                  className="px-3 py-1 rounded-full"
+                  🍻 GET WASTED
+                </motion.span>
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
                   style={{ 
-                    backgroundColor: "rgba(139, 0, 255, 0.2)", 
-                    color: "var(--shadow-purple)" 
+                    backgroundColor: "rgba(139, 0, 255, 0.3)", 
+                    color: "var(--shadow-purple)",
+                    border: "1px solid var(--shadow-purple)"
                   }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(139, 0, 255, 0.5)" }}
                 >
-                  Campy Chaos
-                </span>
+                  🎭 MAIN CHARACTER
+                </motion.span>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Birthday Countdowns */}
+        {/* Fun Birthday Hype Section */}
         <motion.div 
-          className="w-full max-w-6xl mb-12"
+          className="w-full max-w-4xl mb-12"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 1 }}
         >
-          <h2 
-            className="font-orbitron text-2xl md:text-4xl font-bold text-center mb-8 neon-text"
-            style={{ color: "var(--neon-pink)" }}
-          >
-            Birthday Countdowns
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {birthdayPeople.map((person, index) => {
-              const countdown = birthdayCountdowns[person.name];
-              if (!countdown) return null;
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Leo Facts */}
+            <motion.div 
+              className="neon-border rounded-xl p-6"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.3)", 
+                backdropFilter: "blur(10px)",
+                borderColor: "var(--neon-green)"
+              }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 
+                className="font-orbitron text-xl font-bold mb-4 text-center"
+                style={{ color: "var(--neon-green)" }}
+              >
+                👑 LEO KING FACTS 👑
+              </h3>
+              <div className="space-y-2 text-sm md:text-base text-white">
+                <p>🦁 Born to rule the party scene</p>
+                <p>🌟 Main character energy 24/7</p>
+                <p>🔥 Charisma level: MAXIMUM</p>
+                <p>🎭 Drama tolerance: INFINITE</p>
+                <p>🍻 Party stamina: LEGENDARY</p>
+              </div>
+            </motion.div>
 
-              return (
-                <motion.div 
-                  key={person.name}
-                  className="neon-border rounded-xl p-6 text-center"
-                  style={{ 
-                    backgroundColor: "rgba(26, 26, 26, 0.3)", 
-                    backdropFilter: "blur(10px)",
-                    borderColor: person.color 
-                  }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 1.2 + index * 0.2 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div 
-                    className="text-2xl font-orbitron font-bold mb-2"
-                    style={{ color: person.color }}
-                  >
-                    {person.emoji} {person.name}
-                  </div>
-                  {countdown.isComplete ? (
-                    <div 
-                      className="text-xl font-inter"
-                      style={{ color: person.color }}
-                    >
-                      🎉 HAPPY BIRTHDAY! 🎉
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div>
-                        <div 
-                          className="text-lg md:text-xl font-orbitron font-bold"
-                          style={{ color: person.color }}
-                        >
-                          {formatNumber(countdown.days)}
-                        </div>
-                        <div className="text-xs text-gray-400">DAYS</div>
-                      </div>
-                      <div>
-                        <div 
-                          className="text-lg md:text-xl font-orbitron font-bold"
-                          style={{ color: person.color }}
-                        >
-                          {formatNumber(countdown.hours)}
-                        </div>
-                        <div className="text-xs text-gray-400">HRS</div>
-                      </div>
-                      <div>
-                        <div 
-                          className="text-lg md:text-xl font-orbitron font-bold"
-                          style={{ color: person.color }}
-                        >
-                          {formatNumber(countdown.minutes)}
-                        </div>
-                        <div className="text-xs text-gray-400">MIN</div>
-                      </div>
-                      <div>
-                        <div 
-                          className="text-lg md:text-xl font-orbitron font-bold"
-                          style={{ color: person.color }}
-                        >
-                          {formatNumber(countdown.seconds)}
-                        </div>
-                        <div className="text-xs text-gray-400">SEC</div>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
+            {/* Birthday Menu */}
+            <motion.div 
+              className="neon-border rounded-xl p-6"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.3)", 
+                backdropFilter: "blur(10px)",
+                borderColor: "var(--neon-pink)"
+              }}
+              whileHover={{ scale: 1.02 }}
+            >
+              <h3 
+                className="font-orbitron text-xl font-bold mb-4 text-center"
+                style={{ color: "var(--neon-pink)" }}
+              >
+                🍸 WASTED MENU 🍸
+              </h3>
+              <div className="space-y-2 text-sm md:text-base text-white">
+                <p>🥃 Leo's Golden Shots</p>
+                <p>🍹 Birthday Chaos Cocktails</p>
+                <p>🍾 Champagne for the King</p>
+                <p>🍻 Liquid Courage Refills</p>
+                <p>🥂 Celebration Ammunition</p>
+              </div>
+            </motion.div>
           </div>
+
+          {/* Hype Messages */}
+          <motion.div 
+            className="mt-8 text-center"
+            animate={{ 
+              textShadow: [
+                "0 0 10px var(--neon-green)",
+                "0 0 20px var(--neon-pink)", 
+                "0 0 10px var(--shadow-purple)",
+                "0 0 20px var(--neon-green)"
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <p 
+              className="font-orbitron text-lg md:text-xl font-bold"
+              style={{ color: "var(--ghost-white)" }}
+            >
+              {partyTimeRemaining.days > 30 ? "🎯 BIRTHDAY PLANNING MODE ACTIVATED" :
+               partyTimeRemaining.days > 7 ? "⚡ FINAL COUNTDOWN INITIATED" :
+               partyTimeRemaining.days > 1 ? "🚨 DANGER ZONE: PARTY INCOMING" :
+               "🔥 IT'S ALMOST TIME TO GET WASTED"}
+            </p>
+          </motion.div>
         </motion.div>
 
         {/* Party Celebration Message */}
