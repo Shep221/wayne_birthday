@@ -122,11 +122,10 @@ export default function Home() {
         >
           <div className="animate-float">
             <h1 
-              className="glitch-text font-orbitron text-4xl md:text-6xl font-black neon-text mb-4 animate-neon-flicker"
+              className="font-orbitron text-4xl md:text-6xl font-black neon-text mb-4"
               style={{ color: "var(--neon-green)" }}
-              data-text="AUGUST BDAY-VERSE"
             >
-              AUGUST BDAY-VERSE
+              COUNTDOWN
             </h1>
             <p className="font-inter text-lg md:text-xl mb-2" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
               🎂 Wayne's Birthday Countdown 🎂
@@ -143,31 +142,31 @@ export default function Home() {
         {/* Countdown Display */}
         {!timeRemaining.isComplete && (
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-8 w-full max-w-4xl"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-12 w-full max-w-6xl"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
           >
             {/* Days */}
             <motion.div 
-              className="neon-border rounded-xl p-4 md:p-6 text-center animate-pulse-glow"
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ backgroundColor: "rgba(26, 26, 26, 0.5)", backdropFilter: "blur(10px)" }}
               whileHover={{ scale: 1.05 }}
             >
               <div 
-                className="text-3xl md:text-5xl font-orbitron font-black neon-text"
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
                 style={{ color: "var(--neon-green)" }}
               >
                 {formatNumber(timeRemaining.days)}
               </div>
-              <div className="text-xs md:text-sm font-inter mt-2" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
                 CHAOTIC DAYS
               </div>
             </motion.div>
 
             {/* Hours */}
             <motion.div 
-              className="neon-border rounded-xl p-4 md:p-6 text-center animate-pulse-glow"
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ 
                 backgroundColor: "rgba(26, 26, 26, 0.5)", 
                 backdropFilter: "blur(10px)",
@@ -176,19 +175,19 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
             >
               <div 
-                className="text-3xl md:text-5xl font-orbitron font-black neon-text"
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
                 style={{ color: "var(--neon-pink)" }}
               >
                 {formatNumber(timeRemaining.hours)}
               </div>
-              <div className="text-xs md:text-sm font-inter mt-2" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
                 HAUNTED HOURS
               </div>
             </motion.div>
 
             {/* Minutes */}
             <motion.div 
-              className="neon-border rounded-xl p-4 md:p-6 text-center animate-pulse-glow"
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ 
                 backgroundColor: "rgba(26, 26, 26, 0.5)", 
                 backdropFilter: "blur(10px)",
@@ -197,19 +196,19 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
             >
               <div 
-                className="text-3xl md:text-5xl font-orbitron font-black neon-text"
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
                 style={{ color: "var(--shadow-purple)" }}
               >
                 {formatNumber(timeRemaining.minutes)}
               </div>
-              <div className="text-xs md:text-sm font-inter mt-2" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
                 WASTED MINUTES
               </div>
             </motion.div>
 
             {/* Seconds */}
             <motion.div 
-              className="neon-border rounded-xl p-4 md:p-6 text-center animate-pulse-glow"
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ 
                 backgroundColor: "rgba(26, 26, 26, 0.5)", 
                 backdropFilter: "blur(10px)",
@@ -218,12 +217,12 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
             >
               <div 
-                className="text-3xl md:text-5xl font-orbitron font-black neon-text"
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
                 style={{ color: "var(--neon-green)" }}
               >
                 {formatNumber(timeRemaining.seconds)}
               </div>
-              <div className="text-xs md:text-sm font-inter mt-2" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
                 UNHINGED SECONDS
               </div>
             </motion.div>
@@ -250,7 +249,7 @@ export default function Home() {
                 className="font-inter text-lg md:text-xl mb-2"
                 style={{ color: "var(--neon-pink)" }}
               >
-                👑 Time to get WASTED 👑
+                Time to get WASTED
               </p>
               <p 
                 className="font-inter text-sm md:text-base mb-3"

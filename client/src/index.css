@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -73,15 +75,13 @@
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap');
-
 /* Custom animations */
 @keyframes pulse-glow {
   0% { 
-    box-shadow: 0 0 20px var(--neon-green), 0 0 30px var(--neon-green), 0 0 40px var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green), 0 0 12px var(--neon-green), 0 0 16px var(--neon-green);
   }
   100% { 
-    box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green), 0 0 30px var(--neon-green);
+    box-shadow: 0 0 4px var(--neon-green), 0 0 8px var(--neon-green), 0 0 12px var(--neon-green);
   }
 }
 
@@ -92,10 +92,10 @@
 
 @keyframes neon-flicker {
   0% { 
-    text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green), 0 0 30px var(--neon-green);
+    text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green), 0 0 15px var(--neon-green);
   }
   100% { 
-    text-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green), 0 0 15px var(--neon-green);
+    text-shadow: 0 0 3px var(--neon-green), 0 0 6px var(--neon-green), 0 0 9px var(--neon-green);
   }
 }
 
@@ -157,7 +157,7 @@
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite alternate;
+  animation: pulse-glow 3s ease-in-out infinite alternate;
 }
 
 .animate-float {
@@ -165,7 +165,7 @@
 }
 
 .animate-neon-flicker {
-  animation: neon-flicker 0.5s ease-in-out infinite alternate;
+  animation: neon-flicker 2s ease-in-out infinite alternate;
 }
 
 .animate-party-bounce {
