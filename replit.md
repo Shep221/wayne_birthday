@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a modern full-stack web application built for an August birthday party event. The application features a spooky-themed landing page with a countdown timer for the upcoming birthday celebration. It's designed as a single-page application with a React frontend and an Express backend, featuring a clean architecture that separates client, server, and shared components.
+This is a modern full-stack web application built for "The August BDAY-Verse" party event. The application features a spooky-themed landing page with dual countdown functionality: a main countdown to the party date (August 2nd, 7pm) and individual birthday countdowns for three August Leo birthday celebrants. It's designed as a single-page application with a React frontend and an Express backend, featuring a clean architecture that separates client, server, and shared components.
 
 ## User Preferences
 
@@ -34,8 +34,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Components
 - **UI Library**: Complete shadcn/ui component system with 40+ components
-- **Pages**: Home page with countdown timer, 404 Not Found page
-- **Styling**: Dark theme with custom spooky party colors (neon green, ghost white, shadow purple)
+- **Pages**: Home page with dual countdown functionality, 404 Not Found page
+- **Countdown Features**: 
+  - Main party countdown to August 2nd, 7pm-2am
+  - Individual birthday countdowns for Nara Lee (Aug 1), Isabella Rovira (Aug 3), Wayne Wu (Aug 11)
+  - Real-time updates with formatted time display
+- **Styling**: Dark theme with custom spooky party colors (neon green, neon pink, shadow purple)
+- **Animation**: Framer Motion for countdown animations, floating particles, and hover effects
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
 
 ### Backend Components
