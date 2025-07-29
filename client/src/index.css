@@ -118,13 +118,13 @@
 }
 
 /* Custom classes */
-.neon-text {
-  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+.nature-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.neon-border {
-  border: 2px solid var(--neon-green);
-  box-shadow: 0 0 20px var(--neon-green), inset 0 0 20px rgba(0, 255, 136, 0.1);
+.nature-border {
+  border: 2px solid var(--forest-green);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .glitch-text {
@@ -180,12 +180,12 @@
   animation: pulseGlow 3s infinite alternate;
 }
 
-@keyframes pulseGlow {
+@keyframes natureGlow {
   0% {
-    box-shadow: 0 0 5px var(--neon-green), 0 0 10px var(--neon-green), 0 0 15px var(--neon-green);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
   100% {
-    box-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink), 0 0 30px var(--neon-pink);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
 }
 
