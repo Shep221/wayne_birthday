@@ -351,6 +351,41 @@ export default function Home() {
             </p>
           </div>
         </motion.div>
+        <motion.div 
+          className="w-full max-w-4xl mb-12"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+        >
+          <motion.div 
+            className="neon-border rounded-xl p-8 text-center"
+            style={{ 
+              backgroundColor: "rgba(26, 26, 26, 0.4)", 
+              backdropFilter: "blur(15px)",
+              borderColor: "var(--neon-green)"
+            }}
+            whileHover={{ scale: 1.02 }}
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(0, 255, 136, 0.3)",
+                "0 0 40px rgba(0, 255, 136, 0.5)",
+                "0 0 20px rgba(0, 255, 136, 0.3)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <motion.h3 
+              className="font-orbitron text-2xl md:text-3xl font-bold mb-0"
+              style={{ color: "var(--neon-green)" }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🐐 HIKING GOAT 🐐
+            </motion.h3>
+            
+
+          </motion.div>
+        </motion.div>
 
         {/* Party Countdown Display */}
         {!partyTimeRemaining.isComplete && (
@@ -495,13 +530,13 @@ export default function Home() {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                {partyTimeRemaining.days > 100 ? "🎯 THE LEO KING'S BIRTHDAY IS COMING" :
-                 partyTimeRemaining.days > 30 ? "⚡ BIRTHDAY ENERGY BUILDING..." :
-                 partyTimeRemaining.days > 14 ? "🔥 TWO WEEKS TILL CHAOS!" :
-                 partyTimeRemaining.days > 7 ? "🚨 ONE WEEK WARNING!" :
-                 partyTimeRemaining.days > 3 ? "💥 FINAL COUNTDOWN ACTIVATED" :
-                 partyTimeRemaining.days > 1 ? "🎆 ALMOST BIRTHDAY TIME!" :
-                 partyTimeRemaining.days === 1 ? "🎉 TOMORROW IS THE DAY!" :
+                {partyTimeRemaining.days > 30 ? "🎯 THE LEO KING'S BIRTHDAY IS COMING" :
+                 partyTimeRemaining.days > 14 ? "⚡ BIRTHDAY ENERGY BUILDING..." :
+                 partyTimeRemaining.days > 7 ? "🔥 TWO WEEKS TILL CHAOS!" :
+                 partyTimeRemaining.days > 3 ? "🚨 ONE WEEK WARNING!" :
+                 partyTimeRemaining.days > 1 ? "💥 FINAL COUNTDOWN ACTIVATED" :
+                 partyTimeRemaining.days > 0 ? "🎆 ALMOST BIRTHDAY TIME!" :
+                 partyTimeRemaining.days === 0 ? "🎉 TOMORROW IS THE DAY!" :
                  "🍾 IT'S WAYNE'S BIRTHDAY!"}
               </motion.p>
               
@@ -552,41 +587,7 @@ export default function Home() {
         </motion.div>
 
         {/* Genies Bartender Section */}
-        <motion.div 
-          className="w-full max-w-4xl mb-12"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1 }}
-        >
-          <motion.div 
-            className="neon-border rounded-xl p-8 text-center"
-            style={{ 
-              backgroundColor: "rgba(26, 26, 26, 0.4)", 
-              backdropFilter: "blur(15px)",
-              borderColor: "var(--neon-green)"
-            }}
-            whileHover={{ scale: 1.02 }}
-            animate={{
-              boxShadow: [
-                "0 0 20px rgba(0, 255, 136, 0.3)",
-                "0 0 40px rgba(0, 255, 136, 0.5)",
-                "0 0 20px rgba(0, 255, 136, 0.3)"
-              ]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <motion.h3 
-              className="font-orbitron text-2xl md:text-3xl font-bold mb-6"
-              style={{ color: "var(--neon-green)" }}
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              🐐 HIKING GOAT 🐐
-            </motion.h3>
-            
-
-          </motion.div>
-        </motion.div>
+        
 
         {/* August 2nd Party Countdown */}
         {!august2ndCountdown.isComplete && (
