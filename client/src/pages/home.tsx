@@ -26,6 +26,13 @@ export default function Home() {
     isComplete: false,
   });
 
+  const [august2ndCountdown, setAugust2ndCountdown] = useState<TimeRemaining>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    isComplete: false,
+  });
   const [birthdayCountdowns, setBirthdayCountdowns] = useState<Record<string, TimeRemaining>>({});
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const threeContainerRef = useRef<HTMLDivElement>(null);
@@ -159,11 +166,12 @@ export default function Home() {
 
   useEffect(() => {
     const partyDate = new Date("2025-08-11T00:00:00").getTime(); // Wayne's birthday: Aug 11
+    const august2Date = new Date("2025-08-02T19:00:00").getTime(); // August 2nd party: 7pm
 
     const updateCountdowns = () => {
       const now = new Date().getTime();
       
-      // Update party countdown
+      // Update Wayne's birthday countdown
       const partyDistance = partyDate - now;
       if (partyDistance < 0) {
         setPartyTimeRemaining({
@@ -180,6 +188,31 @@ export default function Home() {
         const seconds = Math.floor((partyDistance % (1000 * 60)) / 1000);
 
         setPartyTimeRemaining({
+          days,
+          hours,
+          minutes,
+          seconds,
+          isComplete: false,
+        });
+      }
+
+      // Update August 2nd party countdown
+      const august2Distance = august2Date - now;
+      if (august2Distance < 0) {
+        setAugust2ndCountdown({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          isComplete: true,
+        });
+      } else {
+        const days = Math.floor(august2Distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((august2Distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((august2Distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((august2Distance % (1000 * 60)) / 1000);
+
+        setAugust2ndCountdown({
           days,
           hours,
           minutes,
@@ -346,7 +379,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.days)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                {partyTimeRemaining.days === 1 ? "FINAL DAY!" : partyTimeRemaining.days < 7 ? "CHAOS DAYS" : "DAYS TO PARTY"}
+                {partyTimeRemaining.days === 1 ? "FINAL DAY!" : partyTimeRemaining.days <= 7 ? "CHAOS DAYS" : "DAYS TO PARTY"}
               </div>
             </motion.div>
 
@@ -554,7 +587,7 @@ export default function Home() {
               animate={{ y: [0, -5, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              🍸 GENIES BARTENDER 🍸
+              🐐 HIKING GOAT 🐐
             </motion.h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
@@ -564,21 +597,21 @@ export default function Home() {
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--neon-pink)" }}
                 >
-                  🥃 Master of craft cocktails
+                  🏔️ Mountain trail explorer
                 </motion.p>
                 <motion.p 
                   className="text-lg font-inter mb-3"
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--neon-pink)" }}
                 >
-                  🍹 Mixing magic behind the bar
+                  🥾 Adventure seeker
                 </motion.p>
                 <motion.p 
                   className="text-lg font-inter"
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--neon-pink)" }}
                 >
-                  🌟 Creating liquid experiences
+                  🌲 Nature enthusiast
                 </motion.p>
               </div>
               <div>
@@ -587,26 +620,102 @@ export default function Home() {
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--shadow-purple)" }}
                 >
-                  🎭 Serving stories with every drink
+                  🎒 Summit conquerer
                 </motion.p>
                 <motion.p 
                   className="text-lg font-inter mb-3"
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--shadow-purple)" }}
                 >
-                  🔥 Bringing the nightlife to life
+                  🌟 Trail blazing legend
                 </motion.p>
                 <motion.p 
                   className="text-lg font-inter"
                   style={{ color: "rgba(255, 255, 255, 0.9)" }}
                   whileHover={{ x: 10, color: "var(--shadow-purple)" }}
                 >
-                  🚀 Birthday celebration mode: ON
+                  🎉 Birthday celebration mode: ON
                 </motion.p>
               </div>
             </div>
           </motion.div>
         </motion.div>
+
+        {/* August 2nd Party Countdown */}
+        {!august2ndCountdown.isComplete && (
+          <motion.div 
+            className="w-full max-w-2xl mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.2 }}
+          >
+            <motion.div 
+              className="neon-border rounded-xl p-6 text-center"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.3)", 
+                backdropFilter: "blur(10px)",
+                borderColor: "var(--shadow-purple)"
+              }}
+              whileHover={{ scale: 1.02 }}
+              animate={{
+                boxShadow: [
+                  "0 0 15px rgba(139, 0, 255, 0.3)",
+                  "0 0 25px rgba(139, 0, 255, 0.5)",
+                  "0 0 15px rgba(139, 0, 255, 0.3)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <h4 
+                className="font-orbitron text-lg md:text-xl font-bold mb-4"
+                style={{ color: "var(--shadow-purple)" }}
+              >
+                🎭 AUGUST BDAY-VERSE PARTY 🎭
+              </h4>
+              <div className="text-sm md:text-base font-inter text-white">
+                <p className="mb-2">August 2nd • 7:00 PM - 2:00 AM</p>
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div>
+                    <div 
+                      className="text-lg md:text-xl font-orbitron font-bold"
+                      style={{ color: "var(--shadow-purple)" }}
+                    >
+                      {formatNumber(august2ndCountdown.days)}
+                    </div>
+                    <div className="text-xs opacity-70">days</div>
+                  </div>
+                  <div>
+                    <div 
+                      className="text-lg md:text-xl font-orbitron font-bold"
+                      style={{ color: "var(--shadow-purple)" }}
+                    >
+                      {formatNumber(august2ndCountdown.hours)}
+                    </div>
+                    <div className="text-xs opacity-70">hrs</div>
+                  </div>
+                  <div>
+                    <div 
+                      className="text-lg md:text-xl font-orbitron font-bold"
+                      style={{ color: "var(--shadow-purple)" }}
+                    >
+                      {formatNumber(august2ndCountdown.minutes)}
+                    </div>
+                    <div className="text-xs opacity-70">mins</div>
+                  </div>
+                  <div>
+                    <div 
+                      className="text-lg md:text-xl font-orbitron font-bold"
+                      style={{ color: "var(--shadow-purple)" }}
+                    >
+                      {formatNumber(august2ndCountdown.seconds)}
+                    </div>
+                    <div className="text-xs opacity-70">secs</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         {/* Party Celebration Message */}
         {partyTimeRemaining.isComplete && (
