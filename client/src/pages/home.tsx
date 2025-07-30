@@ -1,414 +1,662 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import * as THREE from "three";
 
 interface TimeRemaining {
   days: number;
   hours: number;
   minutes: number;
   seconds: number;
+  isComplete: boolean;
 }
 
-interface GameState {
-  mode: 'countdown' | 'hiking' | 'skiing';
-  hikerPosition: number;
-  skierPosition: number;
-  speed: number;
-  obstacles: Array<{ id: number; position: number; type: 'tree' | 'rock' }>;
-  score: number;
+interface BirthdayPerson {
+  name: string;
+  date: string;
+  emoji: string;
+  color: string;
 }
 
 export default function Home() {
-  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>({
+  const [partyTimeRemaining, setPartyTimeRemaining] = useState<TimeRemaining>({
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
+    isComplete: false,
   });
 
-  const [gameState, setGameState] = useState<GameState>({
-    mode: 'countdown',
-    hikerPosition: 50,
-    skierPosition: 50,
-    speed: 1,
-    obstacles: [],
-    score: 0
-  });
+  const [birthdayCountdowns, setBirthdayCountdowns] = useState<Record<string, TimeRemaining>>({});
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const threeContainerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
-  // Countdown logic
+  const birthdayPeople: BirthdayPerson[] = [
+    { name: "Wayne Wu", date: "2025-08-11T00:00:00", emoji: "👑", color: "var(--neon-green)" },
+  ];
+
+  // Mouse tracking with trail effect
   useEffect(() => {
-    const targetDate = new Date("2025-08-11T00:00:00").getTime();
+    const handleMouseMove = (event: MouseEvent) => {
+      setMousePosition({
+        x: (event.clientX / window.innerWidth) * 2 - 1,
+        y: -(event.clientY / window.innerHeight) * 2 + 1,
+      });
 
-    const updateCountdown = () => {
-      const now = new Date().getTime();
-      const difference = targetDate - now;
-
-      if (difference > 0) {
-        setTimeRemaining({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000)
-        });
-      }
+      // Create mouse trail particle
+      const trail = document.createElement('div');
+      trail.className = 'mouse-trail';
+      trail.style.left = `${event.clientX - 10}px`;
+      trail.style.top = `${event.clientY - 10}px`;
+      
+      document.body.appendChild(trail);
+      
+      // Remove trail element after animation
+      setTimeout(() => {
+        if (document.body.contains(trail)) {
+          document.body.removeChild(trail);
+        }
+      }, 1000);
     };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Three.js scene setup
+  useEffect(() => {
+    if (!threeContainerRef.current) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    threeContainerRef.current.appendChild(renderer.domElement);
+
+    // Create floating bottles (bartender theme)
+    const bottles: THREE.Mesh[] = [];
+    const bottleGeometry = new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8);
+    
+    for (let i = 0; i < 15; i++) {
+      const bottleMaterial = new THREE.MeshPhongMaterial({
+        color: i % 3 === 0 ? 0x00ff88 : i % 3 === 1 ? 0xff0080 : 0x8b00ff,
+        transparent: true,
+        opacity: 0.7,
+        emissive: i % 3 === 0 ? 0x002200 : i % 3 === 1 ? 0x220022 : 0x220088,
+      });
+      
+      const bottle = new THREE.Mesh(bottleGeometry, bottleMaterial);
+      bottle.position.set(
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 10
+      );
+      bottle.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
+      
+      scene.add(bottle);
+      bottles.push(bottle);
+    }
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+    scene.add(ambientLight);
+    
+    const pointLight = new THREE.PointLight(0x00ff88, 1, 100);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    const pointLight2 = new THREE.PointLight(0xff0080, 1, 100);
+    pointLight2.position.set(-5, -5, 5);
+    scene.add(pointLight2);
+
+    camera.position.z = 8;
+
+    sceneRef.current = scene;
+    rendererRef.current = renderer;
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      // Rotate bottles
+      bottles.forEach((bottle, index) => {
+        bottle.rotation.x += 0.01;
+        bottle.rotation.y += 0.02;
+        
+        // Float up and down
+        bottle.position.y += Math.sin(Date.now() * 0.001 + index) * 0.002;
+        
+        // React to mouse movement
+        bottle.position.x += mousePosition.x * 0.001;
+        bottle.position.z += mousePosition.y * 0.001;
+      });
+
+      // Camera movement based on mouse
+      camera.position.x = mousePosition.x * 2;
+      camera.position.y = mousePosition.y * 1;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    // Cleanup
+    return () => {
+      if (threeContainerRef.current && renderer.domElement) {
+        threeContainerRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, [mousePosition]);
+
+  useEffect(() => {
+    const partyDate = new Date("2025-08-11T00:00:00").getTime(); // Wayne's birthday: Aug 11
+
+    const updateCountdowns = () => {
+      const now = new Date().getTime();
+      
+      // Update party countdown
+      const partyDistance = partyDate - now;
+      if (partyDistance < 0) {
+        setPartyTimeRemaining({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          isComplete: true,
+        });
+      } else {
+        const days = Math.floor(partyDistance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((partyDistance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((partyDistance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((partyDistance % (1000 * 60)) / 1000);
+
+        setPartyTimeRemaining({
+          days,
+          hours,
+          minutes,
+          seconds,
+          isComplete: false,
+        });
+      }
+
+      // Update birthday countdowns
+      const newBirthdayCountdowns: Record<string, TimeRemaining> = {};
+      birthdayPeople.forEach(person => {
+        const birthdayDate = new Date(person.date).getTime();
+        const distance = birthdayDate - now;
+        
+        if (distance < 0) {
+          newBirthdayCountdowns[person.name] = {
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0,
+            isComplete: true,
+          };
+        } else {
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          newBirthdayCountdowns[person.name] = {
+            days,
+            hours,
+            minutes,
+            seconds,
+            isComplete: false,
+          };
+        }
+      });
+      
+      setBirthdayCountdowns(newBirthdayCountdowns);
+    };
+
+    // Update immediately and then every second
+    updateCountdowns();
+    const interval = setInterval(updateCountdowns, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
-  // Hiking game logic
-  useEffect(() => {
-    if (gameState.mode === 'hiking') {
-      const gameLoop = setInterval(() => {
-        setGameState(prev => ({
-          ...prev,
-          hikerPosition: Math.max(0, prev.hikerPosition - 0.5), // Slowly move down if not moving
-          score: prev.score + 1
-        }));
-      }, 100);
-
-      return () => clearInterval(gameLoop);
-    }
-  }, [gameState.mode]);
-
-  // Skiing game logic
-  useEffect(() => {
-    if (gameState.mode === 'skiing') {
-      const gameLoop = setInterval(() => {
-        setGameState(prev => ({
-          ...prev,
-          obstacles: prev.obstacles
-            .map(obs => ({ ...obs, position: obs.position + prev.speed }))
-            .filter(obs => obs.position < 100),
-          score: prev.score + prev.speed
-        }));
-
-        // Add new obstacles randomly
-        if (Math.random() < 0.1) {
-          setGameState(prev => ({
-            ...prev,
-            obstacles: [...prev.obstacles, {
-              id: Date.now(),
-              position: 0,
-              type: Math.random() > 0.5 ? 'tree' : 'rock'
-            }]
-          }));
-        }
-      }, 100);
-
-      return () => clearInterval(gameLoop);
-    }
-  }, [gameState.mode, gameState.speed]);
-
-  // Keyboard controls
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (gameState.mode === 'hiking') {
-        if (e.key === 'ArrowUp' || e.key === 'w') {
-          setGameState(prev => ({
-            ...prev,
-            hikerPosition: Math.min(100, prev.hikerPosition + 5)
-          }));
-        }
-      } else if (gameState.mode === 'skiing') {
-        if (e.key === 'ArrowLeft' || e.key === 'a') {
-          setGameState(prev => ({
-            ...prev,
-            skierPosition: Math.max(0, prev.skierPosition - 10)
-          }));
-        } else if (e.key === 'ArrowRight' || e.key === 'd') {
-          setGameState(prev => ({
-            ...prev,
-            skierPosition: Math.min(100, prev.skierPosition + 10)
-          }));
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [gameState.mode]);
-
-  const startHikingGame = () => {
-    setGameState(prev => ({
-      ...prev,
-      mode: 'hiking',
-      hikerPosition: 0,
-      score: 0
-    }));
-  };
-
-  const startSkiingGame = () => {
-    setGameState(prev => ({
-      ...prev,
-      mode: 'skiing',
-      skierPosition: 50,
-      score: 0,
-      obstacles: []
-    }));
-  };
-
-  const backToCountdown = () => {
-    setGameState(prev => ({
-      ...prev,
-      mode: 'countdown'
-    }));
+  // Floating particles animation variants
+  const particleVariants = {
+    float: {
+      y: [-20, 20, -20],
+      x: [-10, 10, -10],
+      transition: {
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
   };
 
   const formatNumber = (num: number) => num.toString().padStart(2, "0");
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* Three.js Background */}
+      <div 
+        ref={threeContainerRef} 
+        className="fixed inset-0 z-0 pointer-events-none"
+        style={{ mixBlendMode: 'screen' }}
+      />
+      
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-10">
+        <motion.div
+          className="absolute top-10 left-10 w-4 h-4 bg-white rounded-full opacity-30"
+          variants={particleVariants}
+          animate="float"
+        />
+        <motion.div
+          className="absolute top-32 right-20 w-3 h-3 rounded-full opacity-40"
+          style={{ backgroundColor: "var(--neon-green)" }}
+          variants={particleVariants}
+          animate="float"
+          transition={{ delay: -1 }}
+        />
+        <motion.div
+          className="absolute bottom-20 left-1/4 w-5 h-5 rounded-full opacity-25"
+          style={{ backgroundColor: "var(--neon-pink)" }}
+          variants={particleVariants}
+          animate="float"
+          transition={{ delay: -2 }}
+        />
+        <motion.div
+          className="absolute top-1/2 right-10 w-2 h-2 rounded-full opacity-50"
+          style={{ backgroundColor: "var(--shadow-purple)" }}
+          variants={particleVariants}
+          animate="float"
+          transition={{ delay: -0.5 }}
+        />
+        <motion.div
+          className="absolute bottom-32 right-1/3 w-6 h-6 rounded-full opacity-20"
+          style={{ backgroundColor: "var(--neon-green)" }}
+          variants={particleVariants}
+          animate="float"
+          transition={{ delay: -3 }}
+        />
+      </div>
+
       {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        
-        <AnimatePresence mode="wait">
-          {/* Countdown Mode */}
-          {gameState.mode === 'countdown' && (
-            <motion.div
-              key="countdown"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              className="text-center"
+      <div className="relative z-20 flex flex-col items-center justify-center min-h-screen p-4">
+        {/* Header */}
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <div className="animate-float">
+            <h1 
+              className="font-orbitron text-4xl md:text-6xl font-black neon-text mb-4"
+              style={{ color: "var(--neon-green)" }}
             >
-              {/* Header */}
-              <motion.div className="mb-8">
-                <h1 
-                  className="text-4xl md:text-6xl font-bold mb-4"
-                  style={{ color: "var(--earth-brown)" }}
-                >
-                  🏔️ Wayne's Mountain Adventure 🎿
-                </h1>
-                <p 
-                  className="text-lg md:text-xl"
-                  style={{ color: "var(--forest-green)" }}
-                >
-                  Birthday countdown to August 11th, 2025
-                </p>
-              </motion.div>
+              WAYNE'S BIRTHDAY
+            </h1>
+            <p className="font-inter text-lg md:text-xl mb-2" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
+              👑 Time to get WASTED 👑
+            </p>
+            <p 
+              className="font-inter text-sm md:text-base animate-party-bounce"
+              style={{ color: "var(--neon-pink)" }}
+            >
+              August 11th • Leo King Birthday Bash
+            </p>
+          </div>
+        </motion.div>
 
-              {/* Countdown Display */}
-              <div className="grid grid-cols-4 gap-4 mb-12 max-w-2xl">
-                {[
-                  { value: timeRemaining.days, label: "DAYS", color: "var(--mountain-blue)" },
-                  { value: timeRemaining.hours, label: "HOURS", color: "var(--forest-green)" },
-                  { value: timeRemaining.minutes, label: "MINUTES", color: "var(--earth-brown)" },
-                  { value: timeRemaining.seconds, label: "SECONDS", color: "var(--tree-green)" }
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <div 
-                      className="text-3xl md:text-5xl font-bold"
-                      style={{ color: item.color }}
-                    >
-                      {formatNumber(item.value)}
-                    </div>
-                    <div 
-                      className="text-sm md:text-base mt-2"
-                      style={{ color: "var(--earth-brown)" }}
-                    >
-                      {item.label}
-                    </div>
-                  </motion.div>
-                ))}
+        {/* Party Countdown Display */}
+        {!partyTimeRemaining.isComplete && (
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-12 w-full max-w-6xl"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+          >
+            {/* Days */}
+            <motion.div 
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
+              style={{ backgroundColor: "rgba(26, 26, 26, 0.5)", backdropFilter: "blur(10px)" }}
+              whileHover={{ 
+                scale: 1.05, 
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
+            >
+              <div 
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
+                style={{ color: "var(--neon-green)" }}
+              >
+                {formatNumber(partyTimeRemaining.days)}
               </div>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                {partyTimeRemaining.days === 1 ? "FINAL DAY!" : partyTimeRemaining.days < 7 ? "CHAOS DAYS" : "DAYS TO PARTY"}
+              </div>
+            </motion.div>
 
-              {/* Wayne's Character (Placeholder) */}
-              <motion.div 
-                className="mb-8"
-                animate={{ y: [0, -10, 0] }}
+            {/* Hours */}
+            <motion.div 
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.5)", 
+                backdropFilter: "blur(10px)",
+                animationDelay: "-0.5s" 
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
+            >
+              <div 
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
+                style={{ color: "var(--neon-pink)" }}
+              >
+                {formatNumber(partyTimeRemaining.hours)}
+              </div>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                {partyTimeRemaining.hours < 12 && partyTimeRemaining.days === 0 ? "FINAL HOURS!" : "WILD HOURS"}
+              </div>
+            </motion.div>
+
+            {/* Minutes */}
+            <motion.div 
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.5)", 
+                backdropFilter: "blur(10px)",
+                animationDelay: "-1s" 
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
+            >
+              <div 
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
+                style={{ color: "var(--shadow-purple)" }}
+              >
+                {formatNumber(partyTimeRemaining.minutes)}
+              </div>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                {partyTimeRemaining.minutes < 30 && partyTimeRemaining.days === 0 && partyTimeRemaining.hours === 0 ? "LAST MINUTES!" : "WASTED MINUTES"}
+              </div>
+            </motion.div>
+
+            {/* Seconds */}
+            <motion.div 
+              className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.5)", 
+                backdropFilter: "blur(10px)",
+                animationDelay: "-1.5s" 
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                rotateY: mousePosition.x * 10,
+                rotateX: mousePosition.y * -10 
+              }}
+              animate={{
+                rotateY: mousePosition.x * 2,
+                rotateX: mousePosition.y * -2
+              }}
+            >
+              <div 
+                className="text-5xl md:text-7xl font-orbitron font-black neon-text"
+                style={{ color: "var(--neon-green)" }}
+              >
+                {formatNumber(partyTimeRemaining.seconds)}
+              </div>
+              <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                UNHINGED SECONDS
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Dynamic Birthday Quote */}
+        <motion.div 
+          className="text-center mb-8"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+        >
+          <div className="animate-float" style={{ animationDelay: "-1s" }}>
+            <div 
+              className="rounded-xl p-6 border-2"
+              style={{ 
+                backgroundColor: "rgba(26, 26, 26, 0.5)", 
+                backdropFilter: "blur(10px)",
+                borderColor: "var(--neon-green)"
+              }}
+            >
+              <motion.p 
+                className="font-orbitron text-xl md:text-2xl font-bold mb-4"
+                style={{ color: "var(--neon-green)" }}
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  textShadow: [
+                    "0 0 10px var(--neon-green)",
+                    "0 0 20px var(--neon-green)",
+                    "0 0 10px var(--neon-green)"
+                  ]
+                }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <div 
-                  className="w-24 h-24 mx-auto rounded-full bg-gradient-to-b from-orange-300 to-orange-500 flex items-center justify-center text-4xl"
-                  style={{ border: "3px solid var(--earth-brown)" }}
+                {partyTimeRemaining.days > 100 ? "🎯 THE LEO KING'S BIRTHDAY IS COMING" :
+                 partyTimeRemaining.days > 30 ? "⚡ BIRTHDAY ENERGY BUILDING..." :
+                 partyTimeRemaining.days > 14 ? "🔥 TWO WEEKS TILL CHAOS!" :
+                 partyTimeRemaining.days > 7 ? "🚨 ONE WEEK WARNING!" :
+                 partyTimeRemaining.days > 3 ? "💥 FINAL COUNTDOWN ACTIVATED" :
+                 partyTimeRemaining.days > 1 ? "🎆 ALMOST BIRTHDAY TIME!" :
+                 partyTimeRemaining.days === 1 ? "🎉 TOMORROW IS THE DAY!" :
+                 "🍾 IT'S WAYNE'S BIRTHDAY!"}
+              </motion.p>
+              
+              <p 
+                className="font-inter text-base md:text-lg mb-3"
+                style={{ color: "rgba(255, 255, 255, 0.9)" }}
+              >
+                August 11th • Leo King's Domain
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-3 text-sm">
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
+                  style={{ 
+                    backgroundColor: "rgba(0, 255, 136, 0.3)", 
+                    color: "var(--neon-green)",
+                    border: "1px solid var(--neon-green)"
+                  }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(0, 255, 136, 0.5)" }}
                 >
-                  🧑‍🦱
-                </div>
-                <p className="mt-2 font-bold" style={{ color: "var(--earth-brown)" }}>
-                  Wayne
-                </p>
+                  👑 ROYAL VIBES
+                </motion.span>
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
+                  style={{ 
+                    backgroundColor: "rgba(255, 0, 128, 0.3)", 
+                    color: "var(--neon-pink)",
+                    border: "1px solid var(--neon-pink)"
+                  }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 0, 128, 0.5)" }}
+                >
+                  🍻 GET WASTED
+                </motion.span>
+                <motion.span 
+                  className="px-4 py-2 rounded-full font-bold"
+                  style={{ 
+                    backgroundColor: "rgba(139, 0, 255, 0.3)", 
+                    color: "var(--shadow-purple)",
+                    border: "1px solid var(--shadow-purple)"
+                  }}
+                  whileHover={{ scale: 1.1, backgroundColor: "rgba(139, 0, 255, 0.5)" }}
+                >
+                  🎭 MAIN CHARACTER
+                </motion.span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Genies Bartender Section */}
+        <motion.div 
+          className="w-full max-w-4xl mb-12"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1 }}
+        >
+          <motion.div 
+            className="neon-border rounded-xl p-8 text-center"
+            style={{ 
+              backgroundColor: "rgba(26, 26, 26, 0.4)", 
+              backdropFilter: "blur(15px)",
+              borderColor: "var(--neon-green)"
+            }}
+            whileHover={{ scale: 1.02 }}
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(0, 255, 136, 0.3)",
+                "0 0 40px rgba(0, 255, 136, 0.5)",
+                "0 0 20px rgba(0, 255, 136, 0.3)"
+              ]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <motion.h3 
+              className="font-orbitron text-2xl md:text-3xl font-bold mb-6"
+              style={{ color: "var(--neon-green)" }}
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              🍸 GENIES BARTENDER 🍸
+            </motion.h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+              <div>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🥃 Master of craft cocktails
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🍹 Mixing magic behind the bar
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
+                >
+                  🌟 Creating liquid experiences
+                </motion.p>
+              </div>
+              <div>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🎭 Serving stories with every drink
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter mb-3"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🔥 Bringing the nightlife to life
+                </motion.p>
+                <motion.p 
+                  className="text-lg font-inter"
+                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
+                >
+                  🚀 Birthday celebration mode: ON
+                </motion.p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Party Celebration Message */}
+        {partyTimeRemaining.isComplete && (
+          <motion.div 
+            className="text-center animate-party-bounce"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, type: "spring", bounce: 0.5 }}
+          >
+            <div 
+              className="rounded-xl p-8 mb-4 border-2"
+              style={{ 
+                backgroundColor: "rgba(0, 255, 136, 0.2)", 
+                borderColor: "var(--neon-green)" 
+              }}
+            >
+              <h2 
+                className="font-orbitron text-3xl md:text-5xl font-black neon-text mb-4"
+                style={{ color: "var(--neon-green)" }}
+              >
+                🎉 PARTY TIME! 🎉
+              </h2>
+              <p 
+                className="font-inter text-lg md:text-xl mb-4"
+                style={{ color: "rgba(255, 255, 255, 1)" }}
+              >
+                The August BDAY-Verse has begun! Time to get absolutely wasted! 🍻
+              </p>
+              <motion.div 
+                className="text-4xl md:text-6xl"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                🎂👑🎊🥳🎈
               </motion.div>
+            </div>
+          </motion.div>
+        )}
 
-              {/* Game Buttons */}
-              <div className="flex gap-4 justify-center">
-                <motion.button
-                  onClick={startHikingGame}
-                  className="px-6 py-3 rounded-lg font-bold text-white"
-                  style={{ backgroundColor: "var(--forest-green)" }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  🥾 Start Hiking
-                </motion.button>
-                <motion.button
-                  onClick={startSkiingGame}
-                  className="px-6 py-3 rounded-lg font-bold text-white"
-                  style={{ backgroundColor: "var(--mountain-blue)" }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  🎿 Start Skiing
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Hiking Game */}
-          {gameState.mode === 'hiking' && (
-            <motion.div
-              key="hiking"
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 100 }}
-              className="w-full max-w-4xl"
-            >
-              <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold" style={{ color: "var(--earth-brown)" }}>
-                  🥾 Mountain Hiking
-                </h2>
-                <p style={{ color: "var(--forest-green)" }}>
-                  Use ↑ or W to climb up! Score: {gameState.score}
-                </p>
-              </div>
-
-              {/* Hiking Trail */}
-              <div 
-                className="relative w-full h-96 rounded-lg overflow-hidden"
-                style={{ backgroundColor: "var(--forest-green)" }}
-              >
-                {/* Trail markers */}
-                {[...Array(10)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-full h-1 bg-white/30"
-                    style={{ top: `${i * 10}%` }}
-                  />
-                ))}
-                
-                {/* Wayne hiking character */}
-                <motion.div
-                  className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-gradient-to-b from-orange-300 to-orange-500 flex items-center justify-center text-2xl"
-                  style={{ 
-                    bottom: `${gameState.hikerPosition}%`,
-                    border: "2px solid var(--earth-brown)"
-                  }}
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                >
-                  🧑‍🦱
-                </motion.div>
-
-                {/* Trees */}
-                {[...Array(8)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute text-2xl"
-                    style={{
-                      left: `${Math.random() * 80 + 10}%`,
-                      top: `${Math.random() * 80 + 10}%`
-                    }}
-                  >
-                    🌲
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center mt-4">
-                <motion.button
-                  onClick={backToCountdown}
-                  className="px-4 py-2 rounded-lg"
-                  style={{ backgroundColor: "var(--earth-brown)", color: "white" }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  ← Back to Countdown
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Skiing Game */}
-          {gameState.mode === 'skiing' && (
-            <motion.div
-              key="skiing"
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              className="w-full max-w-4xl"
-            >
-              <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold" style={{ color: "var(--mountain-blue)" }}>
-                  🎿 Ski Down
-                </h2>
-                <p style={{ color: "var(--forest-green)" }}>
-                  Use ← → or A/D to avoid obstacles! Score: {gameState.score}
-                </p>
-              </div>
-
-              {/* Ski Slope */}
-              <div 
-                className="relative w-full h-96 rounded-lg overflow-hidden"
-                style={{ backgroundColor: "var(--snow-white)" }}
-              >
-                {/* Ski tracks */}
-                <div className="absolute inset-0 opacity-30">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-1 h-full bg-gray-400"
-                      style={{ left: `${20 + i * 15}%` }}
-                    />
-                  ))}
-                </div>
-
-                {/* Wayne skiing character */}
-                <motion.div
-                  className="absolute bottom-4 w-12 h-12 rounded-full bg-gradient-to-b from-orange-300 to-orange-500 flex items-center justify-center text-2xl"
-                  style={{ 
-                    left: `${gameState.skierPosition}%`,
-                    border: "2px solid var(--mountain-blue)"
-                  }}
-                  animate={{ rotate: [-5, 5] }}
-                  transition={{ duration: 0.3, repeat: Infinity }}
-                >
-                  🧑‍🦱
-                </motion.div>
-
-                {/* Obstacles */}
-                {gameState.obstacles.map((obstacle) => (
-                  <motion.div
-                    key={obstacle.id}
-                    className="absolute text-3xl"
-                    style={{ 
-                      top: `${obstacle.position}%`,
-                      left: `${Math.random() * 80 + 10}%`
-                    }}
-                    initial={{ y: -50 }}
-                    animate={{ y: 0 }}
-                  >
-                    {obstacle.type === 'tree' ? '🌲' : '🪨'}
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="text-center mt-4">
-                <motion.button
-                  onClick={backToCountdown}
-                  className="px-4 py-2 rounded-lg"
-                  style={{ backgroundColor: "var(--mountain-blue)", color: "white" }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  ← Back to Countdown
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Footer */}
+        <motion.div 
+          className="text-center text-xs md:text-sm font-inter"
+          style={{ color: "rgba(255, 255, 255, 0.5)" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
+        >
+          <p>Dress Code: Black ⚫ White ⚪ Green 🟢</p>
+          <p className="mt-1">Ghostly Chic meets Glam Goblin ✨</p>
+        </motion.div>
       </div>
     </div>
   );
