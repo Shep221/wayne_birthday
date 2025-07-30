@@ -43,28 +43,34 @@ export default function Home() {
     { name: "Wayne Wu", date: "2025-08-11T00:00:00", emoji: "👑", color: "var(--neon-green)" },
   ];
 
-  // Mouse tracking with trail effect
+  // Mouse tracking with reduced trail effect
   useEffect(() => {
+    let lastTrailTime = 0;
     const handleMouseMove = (event: MouseEvent) => {
       setMousePosition({
         x: (event.clientX / window.innerWidth) * 2 - 1,
         y: -(event.clientY / window.innerHeight) * 2 + 1,
       });
 
-      // Create mouse trail particle
-      const trail = document.createElement('div');
-      trail.className = 'mouse-trail';
-      trail.style.left = `${event.clientX - 10}px`;
-      trail.style.top = `${event.clientY - 10}px`;
-      
-      document.body.appendChild(trail);
-      
-      // Remove trail element after animation
-      setTimeout(() => {
-        if (document.body.contains(trail)) {
-          document.body.removeChild(trail);
-        }
-      }, 1000);
+      // Create mouse trail particle less frequently for performance
+      const now = Date.now();
+      if (now - lastTrailTime > 100) { // Only create trail every 100ms
+        const trail = document.createElement('div');
+        trail.className = 'mouse-trail';
+        trail.style.left = `${event.clientX - 10}px`;
+        trail.style.top = `${event.clientY - 10}px`;
+        
+        document.body.appendChild(trail);
+        
+        // Remove trail element after animation
+        setTimeout(() => {
+          if (document.body.contains(trail)) {
+            document.body.removeChild(trail);
+          }
+        }, 1000);
+        
+        lastTrailTime = now;
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -83,11 +89,11 @@ export default function Home() {
     renderer.setClearColor(0x000000, 0);
     threeContainerRef.current.appendChild(renderer.domElement);
 
-    // Create floating bottles (bartender theme)
+    // Create floating bottles (simple theme)
     const bottles: THREE.Mesh[] = [];
-    const bottleGeometry = new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8);
+    const bottleGeometry = new THREE.CylinderGeometry(0.1, 0.15, 0.8, 6);
     
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 8; i++) {
       const bottleMaterial = new THREE.MeshPhongMaterial({
         color: i % 3 === 0 ? 0x00ff88 : i % 3 === 1 ? 0xff0080 : 0x8b00ff,
         transparent: true,
@@ -128,26 +134,22 @@ export default function Home() {
     sceneRef.current = scene;
     rendererRef.current = renderer;
 
-    // Animation loop
+    // Animation loop (simplified for performance)
     const animate = () => {
       requestAnimationFrame(animate);
       
-      // Rotate bottles
+      // Rotate bottles (slower)
       bottles.forEach((bottle, index) => {
-        bottle.rotation.x += 0.01;
-        bottle.rotation.y += 0.02;
+        bottle.rotation.x += 0.005;
+        bottle.rotation.y += 0.01;
         
-        // Float up and down
-        bottle.position.y += Math.sin(Date.now() * 0.001 + index) * 0.002;
-        
-        // React to mouse movement
-        bottle.position.x += mousePosition.x * 0.001;
-        bottle.position.z += mousePosition.y * 0.001;
+        // Subtle float up and down
+        bottle.position.y += Math.sin(Date.now() * 0.0005 + index) * 0.001;
       });
 
-      // Camera movement based on mouse
-      camera.position.x = mousePosition.x * 2;
-      camera.position.y = mousePosition.y * 1;
+      // Subtle camera movement based on mouse
+      camera.position.x = mousePosition.x * 0.5;
+      camera.position.y = mousePosition.y * 0.3;
       camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
@@ -363,13 +365,11 @@ export default function Home() {
               className="neon-border rounded-xl p-6 md:p-8 text-center animate-pulse-glow"
               style={{ backgroundColor: "rgba(26, 26, 26, 0.5)", backdropFilter: "blur(10px)" }}
               whileHover={{ 
-                scale: 1.05, 
-                rotateY: mousePosition.x * 10,
-                rotateX: mousePosition.y * -10 
+                scale: 1.02
               }}
               animate={{
-                rotateY: mousePosition.x * 2,
-                rotateX: mousePosition.y * -2
+                rotateY: mousePosition.x * 1,
+                rotateX: mousePosition.y * -1
               }}
             >
               <div 
@@ -379,7 +379,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.days)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                {partyTimeRemaining.days === 1 ? "FINAL DAY!" : partyTimeRemaining.days <= 7 ? "CHAOS DAYS" : "DAYS TO PARTY"}
+                DAYS
               </div>
             </motion.div>
 
@@ -392,13 +392,11 @@ export default function Home() {
                 animationDelay: "-0.5s" 
               }}
               whileHover={{ 
-                scale: 1.05,
-                rotateY: mousePosition.x * 10,
-                rotateX: mousePosition.y * -10 
+                scale: 1.02
               }}
               animate={{
-                rotateY: mousePosition.x * 2,
-                rotateX: mousePosition.y * -2
+                rotateY: mousePosition.x * 1,
+                rotateX: mousePosition.y * -1
               }}
             >
               <div 
@@ -408,7 +406,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.hours)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                {partyTimeRemaining.hours < 12 && partyTimeRemaining.days === 0 ? "FINAL HOURS!" : "WILD HOURS"}
+                HOURS
               </div>
             </motion.div>
 
@@ -421,13 +419,11 @@ export default function Home() {
                 animationDelay: "-1s" 
               }}
               whileHover={{ 
-                scale: 1.05,
-                rotateY: mousePosition.x * 10,
-                rotateX: mousePosition.y * -10 
+                scale: 1.02
               }}
               animate={{
-                rotateY: mousePosition.x * 2,
-                rotateX: mousePosition.y * -2
+                rotateY: mousePosition.x * 1,
+                rotateX: mousePosition.y * -1
               }}
             >
               <div 
@@ -437,7 +433,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.minutes)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                {partyTimeRemaining.minutes < 30 && partyTimeRemaining.days === 0 && partyTimeRemaining.hours === 0 ? "LAST MINUTES!" : "WASTED MINUTES"}
+                MINUTES
               </div>
             </motion.div>
 
@@ -450,13 +446,11 @@ export default function Home() {
                 animationDelay: "-1.5s" 
               }}
               whileHover={{ 
-                scale: 1.05,
-                rotateY: mousePosition.x * 10,
-                rotateX: mousePosition.y * -10 
+                scale: 1.02
               }}
               animate={{
-                rotateY: mousePosition.x * 2,
-                rotateX: mousePosition.y * -2
+                rotateY: mousePosition.x * 1,
+                rotateX: mousePosition.y * -1
               }}
             >
               <div 
@@ -466,7 +460,7 @@ export default function Home() {
                 {formatNumber(partyTimeRemaining.seconds)}
               </div>
               <div className="text-sm md:text-base font-inter mt-3" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-                UNHINGED SECONDS
+                SECONDS
               </div>
             </motion.div>
           </motion.div>
@@ -590,54 +584,7 @@ export default function Home() {
               🐐 HIKING GOAT 🐐
             </motion.h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              <div>
-                <motion.p 
-                  className="text-lg font-inter mb-3"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
-                >
-                  🏔️ Mountain trail explorer
-                </motion.p>
-                <motion.p 
-                  className="text-lg font-inter mb-3"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
-                >
-                  🥾 Adventure seeker
-                </motion.p>
-                <motion.p 
-                  className="text-lg font-inter"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--neon-pink)" }}
-                >
-                  🌲 Nature enthusiast
-                </motion.p>
-              </div>
-              <div>
-                <motion.p 
-                  className="text-lg font-inter mb-3"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
-                >
-                  🎒 Summit conquerer
-                </motion.p>
-                <motion.p 
-                  className="text-lg font-inter mb-3"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
-                >
-                  🌟 Trail blazing legend
-                </motion.p>
-                <motion.p 
-                  className="text-lg font-inter"
-                  style={{ color: "rgba(255, 255, 255, 0.9)" }}
-                  whileHover={{ x: 10, color: "var(--shadow-purple)" }}
-                >
-                  🎉 Birthday celebration mode: ON
-                </motion.p>
-              </div>
-            </div>
+
           </motion.div>
         </motion.div>
 
